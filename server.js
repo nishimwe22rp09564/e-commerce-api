@@ -72,34 +72,48 @@ app.post('/register', async (req, res) => {
 // Login user and return JWT token
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-
+  
+  console.log('Login attempt for:', email);
+  
   db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
-    if (err) return res.status(500).json({ error: 'Server error' });
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+    
+    console.log('Query results:', results);
+    
     if (results.length === 0) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
     const user = results[0];
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    // Create JWT token valid for 1 hour
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
-
-    res.json({
-      message: 'Login successful',
-      token, // <-- return token here
-      user: {
-        id: user.id,
-        full_name: user.full_name,
-        email: user.email
+    try {
+      const isMatch = await bcrypt.compare(password, user.password);
+      
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid email or password' });
       }
-    });
+
+      // Create JWT token valid for 1 hour
+      const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+
+      res.json({
+        message: 'Login successful',
+        token,
+        user: {
+          id: user.id,
+          full_name: user.full_name,
+          email: user.email
+        }
+      });
+    } catch (error) {
+      console.error('Bcrypt error:', error);
+      return res.status(500).json({ error: 'Authentication error' });
+    }
   });
 });
+
 
 // Protected: Get all products
 app.get('/products', (req, res) => {
