@@ -380,7 +380,7 @@ app.get('/products/:id', (req, res) => {
   if (!user) return;
 
   const { id } = req.params;
-  db.query('SELECT * FROM products WHERE id = ?', [id], (err, results) => {
+  pool.query('SELECT * FROM products WHERE id = ?', [id], (err, results) => {
     if (err) return res.status(500).send(err);
     if (results.length === 0) return res.status(404).json({ message: 'Product not found' });
     res.json(results[0]);
@@ -429,7 +429,7 @@ app.post('/products', (req, res) => {
   if (!user) return;
 
   const { name, price, image_url, category } = req.body;
-  db.query(
+  pool.query(
     'INSERT INTO products (name, price, image_url, category) VALUES (?, ?, ?, ?)',
     [name, price, image_url, category],
     (err, result) => {
@@ -441,8 +441,8 @@ app.post('/products', (req, res) => {
 
 
 
-app.get('/products', (req,res)=>{
-  db.query('SELECT * FROM products', (err, results) => {
+app.get('/', (req,res)=>{
+  pool.query('SELECT * FROM products', (err, results) => {
     if (err) return res.status(500).send(err);
     res.json(results);
   });
@@ -496,7 +496,7 @@ app.put('/products/:id', (req, res) => {
   const { name, price, image_url, category } = req.body;
 
   // Added WHERE clause here, which was missing before
-  db.query(
+  pool.query(
     'UPDATE products SET name = ?, price = ?, image_url = ?, category = ? WHERE id = ?',
     [name, price, image_url, category, id],
     (err, result) => {
@@ -536,7 +536,7 @@ app.delete('/products/:id', (req, res) => {
   if (!user) return;
 
   const { id } = req.params;
-  db.query('DELETE FROM products WHERE id = ?', [id], (err, result) => {
+  pool.query('DELETE FROM products WHERE id = ?', [id], (err, result) => {
     if (err) return res.status(500).send(err);
     res.json({ message: 'Product deleted successfully' });
   });
