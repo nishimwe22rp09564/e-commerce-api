@@ -441,7 +441,7 @@ app.post('/products', (req, res) => {
 
 
 
-app.get('/', (req,res)=>{
+app.get('/products', (req,res)=>{
   pool.query('SELECT * FROM products', (err, results) => {
     if (err) return res.status(500).send(err);
     res.json(results);
