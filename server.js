@@ -439,6 +439,15 @@ app.post('/products', (req, res) => {
   );
 });
 
+
+
+app.get('/products', (req,res)=>{
+  db.query('SELECT * FROM products', (err, results) => {
+    if (err) return res.status(500).send(err);
+    res.json(results);
+  });
+});
+
 /**
  * @swagger
  * /products/{id}:
